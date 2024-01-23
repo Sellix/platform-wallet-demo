@@ -37,7 +37,7 @@ sequenceDiagram
 ```
 
 ### `getMerchantDashboard` (merchant sees his wallet/dashboard)
-- the merchant calls the platform server to get the wallet url to the `/balances` with a merchant token from the Sellx API
+- the merchant calls the platform server to get the wallet url to the `/balances` page with a merchant token from the Sellx API
 - the platform frontend renders the wallet iframe using the received url with the merchant token
 - the wallet uses the merchant token (instead of receiving postMessage) to make the `/wallet/self` API call and gets his addresses
 - the wallet uses the merchant token (instead of receiving postMessage) to make the `/wallet/estimate/<currency>/reusable_addresses` API call to check if there is the need to upload new addresses
