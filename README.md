@@ -108,19 +108,24 @@ the wallet iframe can be rendered adding a `dark = true` query parameter to the 
 WIP
 
 ## Concordium setup flow
-Concordium needs a different setup flow because it requires the user to perform a KYC process.
-- the wallet prompts the user to insert his mnemonic
+Concordium needs a different setup flow because it requires the merchant to perform a KYC process.
+- the wallet prompts the merchant to insert his mnemonic
 - the iframe location is redirected to the Concordium KYC provider page (without leaving the platform page)
-- the user performs the KYC process
+- the merchant performs the KYC process
 - the iframe location is redirected back to the wallet
-- the user is asked again to insert his mnemonic and his account will be created
+- the merchant is asked again to insert his mnemonic and his account will be created
+- the address is uploaded to sellix backend using the `/wallet/address` endpoint
 ```mermaid
-sequenceDiagram
-    Note left of wallet: merchant inserts his mnemonic
-    wallet->>ccd KYC provider: merchant is redirected to the provider page
-    Note right of ccd KYC provider: merchant performs KYC flow
-    ccd KYC provider->>wallet: merchant returns to the wallet url
-    Note left of wallet: merchant inserts again his mnemonic <br /> the user's address is created
+flowchart TD
+    A[Merchant presses button to add concordium] --> B
+    B[Merchant is prompted to insert his mnemonic] --> C
+    C[Wallet is redirected to the KYC provider's page] --> D
+    D[Merchant fill's in his infos completing the KYC flow] --> E
+    E[Merchant is redirected back to the wallet] --> F
+    F[Merchant inserts his mnemonic again] --> G
+    G[Merchant concordium account is finalized] --> H
+    H[Merchant obtains his new concordium address] --> I
+    I[Address is uploaded to Sellix backend using /wallet/address]
 ```
 
 ## New Sellix Endpoints
