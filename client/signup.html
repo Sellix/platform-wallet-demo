@@ -3,16 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Platform Wallet Demo</title>
+    <title>Signup - Platform Wallet Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body>
-    Hello world!
-    <a href="signup.html">Signup</a>
+  <body class="h-screen w-full flex justify-center mt-10" id="app">
+    <div class="flex flex-col text-center" id="signup_form">
+      <h3 class="text-2xl">Signup form</h3>
+      <label for="signup_name">Name</label>
+      <input class="input" type="text" name="signup_name" id="signup_name">
+      <label for="signup_email">Email</label>
+      <input type="email" name="signup_email" id="signup_email">
+      <button id="signup_button" >Signup</button>
+    </div>
+
+
+
+
+
     <script type="module" src="./main.js"></script>
   </body>
 </html>
