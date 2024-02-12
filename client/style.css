@@ -1,3 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .hidden {
   display: none;
+}
+
+input {
+  @apply border border-2 border-gray-400 rounded-lg p-2;
+}
+
+button {
+  @apply bg-blue-500 text-white rounded-lg p-2;
+}
+
+iframe {
+  @apply border border-2 border-gray-200 rounded-lg;
 }

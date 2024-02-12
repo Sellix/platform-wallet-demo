@@ -4,8 +4,8 @@ import axios from "axios"
 import cors from "cors"
 
 const app = express()
-app.use(cors())
 app.use(express.json())
+app.use(cors())
 
 const SELLIX_BASE_URL = "https://dev.sellix.io/v1"
 
@@ -29,6 +29,25 @@ app.post("/createMerchant", async(req, res) => {
     res.json(sellixRes.data)
   } else {
     users.push(sellixRes.data.data.merchant)
+    res.statusCode = 200
+    res.json(sellixRes.data.data.merchant)
+  }
+})
+
+app.post("/getMerchantDashboard", async(req, res) => {
+  const { email } = req.body
+  const user = users.find(u => u.email === email)
+  if (!user) {
+    res.statusCode = 404
+    res.json({
+      error: "NOT_FOUND"
+    })
+  }
+  const sellixRes = await axiosInstance.get(`/wallet/merchant/${user.id}`)
+  if (sellixRes.data.status !== 200) {
+    res.statusCode = sellixRes.data.status
+    res.json(sellixRes.data)
+  } else {
     res.statusCode = 200
     res.json(sellixRes.data.data.merchant)
   }
