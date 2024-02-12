@@ -2,10 +2,14 @@
 
 # Platform Wallet Demo
 ## Dev
+To setup the platform demo and try it out follow these steps:
 ```sh
 npm run i:all
+cp ./server/.env.example ./server/.env # add your Sellix API key in this file
 npm run dev
 ```
+Then you can go to http://localhost:9998 and press the `signup` button.
+
 ## Keywords
 - `platform` = the platform that will use Sellix as wallet provider
 - `merchant_id` = the user's id in the Sellix ecosystem, every platform user will need a Sellix `merchant_id` to use the wallet
@@ -128,19 +132,157 @@ flowchart TD
     I[Address is uploaded to Sellix backend using /wallet/address]
 ```
 
-## New Sellix Endpoints
+## Sellix Endpoints
 Listed down here are the endpoints that Sellix backend uses to interact with the platform
-### `/wallet/createWalletMerchant` (API key auth)
+### POST `/wallet/merchant` (API key auth)
 - the platform calls Sellix API to create a new merchant
-- the endpoint will require all the needed user information to create a new merchant: WIP
-- the endpoint will return the `merchant_id` and the `merchant_token` that will be used to authenticate the merchant during the wallet setup.
+- the endpoint will require all the needed user information to create a new merchant:
+```js
+{
+  email: "merchant@merchant.com", // unique
+  name: "merchantName", // unique
+  custom_fields: {} // object or null, the platform can pass additional information that can be later retrieved using GET /wallet/merchant
+}
+```
+- the endpoint returns:
+```js
+{
+  status: 200,
+  data: {
+    merchant: {
+      id: 'plat_....',
+      name: 'merchantName',
+      email: 'merchant@merchant.com',
+      custom_fields: null,
+      token: 'platform_token_....',
+      expire_at: 00000000
+    }
+  },
+  error: null,
+  message: null,
+  env: 'production'
+}
+```
 
-### `/wallet/getWalletMerchant` (API key auth)
+### GET `/wallet/merchant/<merchant_id>` (API key auth)
 - the platform calls Sellix API to retrive the `merchant_token` that will be used to authenticate the merchant during ALL the other wallet flows listed above.
 - the endpoint will require the `merchant_id` as parameter
+- the endpoint returns:
+```js
+{
+  status: 200,
+  data: {
+    merchant: {
+      id: 'plat_....',
+      name: 'merchantName',
+      email: 'merchant@merchant.com',
+      custom_fields: null,
+      token: 'platform_token_....',
+      expire_at: 00000000
+    }
+  },
+  error: null,
+  message: null,
+  env: 'production'
+}
+```
 
-### `/wallet/refreshMerchantToken` (Merchant token auth)
-- the wallet calls Sellix API to refresh the `merchant_token` that will expire after a certain amount of time.
 
-## TODOs
-- we need to add the transaction page to the wallet iframe
+## Integration Guide - Setup
+The setup flow consists in a few steps that the platform has to follow in order to make the setup of new users proceed correctly.
+Firstly the platform needs to integrate in its user system a way to store the `merchant_id` returned from sellix.
+When the platform's backend calls `/wallet/merchant` the user will be added to the Sellix backend, as the response you will get the `merchant_token` and the `merchant_id` with the additional information that you passed calling `/wallet/merchant`.
+
+For example, in this phase you should add the `merchant_id` to the corresponding column in you User table in your database
+
+Now the user needs to complete the wallet setup flow to create his crypto addresses. In order to do that, the Platform frontend has to render the iframe that will host the wallet.
+To use correctly the wallet iframe the platform needs to pass a few parameters in query string while rendering the wallet, here's an example in JavaScript
+```js
+const qs = new URLSearchParams({
+  token, // required, the token got from /wallet/merchant, the one starting with "platform_token_..."
+  platform_id: encodeURIComponent("platform-demo"), // required, a string identifying the platform, you can use what you want, the end users will not see this value
+  setup_finish_link: "http://localhost:9998/login.html" // required, a url of your page used to redirect the user once the setup is completed
+  dark: true // non required, whether the wallet should be shown in dark mode or not, do not pass the flag or leave undefined for light mode
+})
+```
+
+```html
+<iframe
+  src="<wallet_url>/setup?<qs>"
+  sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-top-navigation"
+  allow=""
+  referrerpolicy="unsafe-url"
+>
+</iframe>
+```
+## Integration Guide - Usage
+Once the user is setup he has access to all the rest of the wallet functionalities.
+The plaform frontend makes a call to the backend that will get his `merchant_token` using GET `/wallet/merchant/<merchant_id>`.
+Now the wallet iframe can be rendered using the token with the same parameters as above on the `/balances` page
+```html
+<iframe
+  src="<wallet_url>/balances?<qs>"
+  sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-top-navigation"
+  allow=""
+  referrerpolicy="unsafe-url"
+>
+</iframe>
+```
+## Integration Guide - Concordium
+Concordium needs a different KYC process to create an account and get the merchant's address so to support Concordium for the platform users you will need to add an additional parameter in the query string (`redirect_uri`), when the users presses `Configure` to add Concordium, is brought to the KYC provider page, once the KYC is completed the user will be redirected back using this `redirect_uri`
+```js
+const qs = new URLSearchParams({
+  token,
+  platform_id: encodeURIComponent("platform-demo"),
+  redirect_uri: "http://localhost:9998/complete-concordium-setup.html", // <-- this one
+  setup_finish_link: "http://localhost:9998/login.html"
+})
+```
+In this example we created a different html page to complete Concodium setup, you can do as you like, the only constrant is that the iframe on the complete concordium uri has to be rendered using these parameters:
+```js
+const qs = new URLSearchParams({
+  token,
+  platform_id: encodeURIComponent("platform-demo"),
+  url: encodeURIComponent(window.location.toString().split("#")[1]), // <-- get's the code uri that will be address to your redirect uri, used to complete concordium setup
+  setup_finish_link: "http://localhost:9998/login.html"
+})
+```
+And the iframe should be rendered like this:
+```html
+<iframe
+  src="<walletUrl>/complete-concordium-setup?<qs>"
+  width="780px"
+  height="605px"
+  sandbox="allow-forms allow-scripts allow-same-origin allow-downloads allow-popups allow-top-navigation"
+  allow=""
+  referrerpolicy="no-referrer"
+>
+</iframe>
+```
+## Integration Guide - Query parameters overview
+Here's the list of all the accepted query parameters that can be passed to the wallet iframe url
+### `token` (required)
+The `merchant_token` that starts with `platform_token_...` is used to authenticate the user while comunicating with sellix backend
+### `platform_id` (required)
+A string containing the platform name that will be used to store correctly the merchant token in the user's Session Storage
+### `setup_finish_link` (required)
+A url pointing to a platform page, this will be used in various instances:
+- when the user completes the setup of his addresses on the `/setup` page, the last `complete` button will redirect the user using this link
+- when the user performs the `forgot mnemonic` flow and completes it, the last `complete` button will redirect the user using this link
+- when the user performs the `concordium setup` flow, the last `complete` button will redirect the user using this link
+### `dark` (non required)
+If passed the only accepted value is `true`, it will render the iframe using dark color palette instead of light
+### `redirect_uri` (non required)
+If passed the users will be able to perform the `concordium setup` flow, else the users won't be able to use concordium at all.
+This is a url pointing to a page in the platform frontend that will handle the redirect after the user completes the KYC process.
+The url in the returning page will look like this if we pass `http://localhost:9998/complete-concordium-setup.html` as `redirect_uri`:
+```
+http://localhost:9998/complete-concordium-setup.html#code_uri=...
+```
+### `url` (non required)
+It is required when rendering the iframe in the `/complete-concordium-setup` page. You have to pass the string after the `#` character like in the example:
+```js
+// ...
+const url = encodeURIComponent(window.location.toString().split("#")[1])
+// ...
+```
