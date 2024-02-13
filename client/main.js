@@ -92,7 +92,6 @@ const login = async() => {
         referrerpolicy="no-referrer"
       >
       </iframe>
-
     `
   }
 }

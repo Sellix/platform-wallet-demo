@@ -9,14 +9,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body class="h-screen w-full flex justify-center mt-10" id="app">
-    <div class="flex flex-col text-center gap-4" id="login_form">
-      <h3 class="text-2xl">Login form</h3>
-      <label for="login_email">Email</label>
-      <input type="email" name="login_email" id="login_email">
-      <button id="login_button" >Login</button>
+  <body>
+    <p id="title"></p>
+    <div class="h-screen w-full flex justify-center mt-10" id="app">
+      <div class="flex flex-col text-center gap-4" id="login_form">
+        <h3 class="text-2xl">Login form</h3>
+        <label for="login_email">Email</label>
+        <input type="email" name="login_email" id="login_email">
+        <button id="login_button" >Login</button>
+      </div>
+      <script type="module" src="./main.js"></script>
     </div>
 
-    <script type="module" src="./main.js"></script>
+    <script src="./eventListener.js"></script>
   </body>
 </html>
