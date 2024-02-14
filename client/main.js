@@ -15,7 +15,7 @@ const getWalletUrl = (target = "local") => {
   }
 }
 
-const walletUrl = getWalletUrl("local")
+const walletUrl = getWalletUrl("staging")
 
 const signupButton = document.querySelector('#signup_button')
 const signUp = async() => {
