@@ -5,7 +5,7 @@
 To setup the platform demo and try it out follow these steps:
 ```sh
 npm run i:all
-cp ./server/.env.example ./server/.env # add your Sellix API key in this file
+cp ./server/.env.sample ./server/.env # add your Sellix API key in this file
 npm run dev
 ```
 Then you can go to http://localhost:9998 and press the `signup` button.
