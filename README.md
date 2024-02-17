@@ -113,6 +113,19 @@ Payments work with the standard [Sellix Payments API](https://developers.sellix.
 
 It will return a checkout URL where you can redirect the customer to send the payment.
 
+The platform can also pass any custom fee when creating the payment, which will be charged to the customer.
+
+```json
+{
+  "platform_fee": {
+    "percentage": 5,
+    "fixed_fee": 0.10
+  }
+}
+```
+
+The fixed fee is always taken as `USD`, it will be added on top of any percentage passed.
+
 Sample code snippets
 
 PHP
@@ -126,6 +139,10 @@ $data = [
 	"title" => "Platform Payment",
 	"value" => 2.50,
 	"currency" => "USD",
+  "platform_fee" => [
+    "percentage" => 5,
+    "fixed_fee" => 0.10
+  ],
 	"email" => "example@gmail.com",
   "white_label" => false,
 	"webhook" => "https://webhook.sellix.io/api/v1/example",
@@ -169,6 +186,10 @@ const options = {
     "title": "Platform Payment",
     "value": 2.5,
     "currency": "USD",
+    "platform_fee": {
+      "percentage": 5,
+      "fixed_fee": 0.10
+    },
     "email": "example@gmail.com",
     "white_label": false,
     "webhook": "https://webhook.sellix.io/api/v1/example",
@@ -194,6 +215,10 @@ payload = json.dumps({
   "title": "Platform Payment",
   "value": 2.5,
   "currency": "USD",
+  "platform_fee": {
+    "percentage": 5,
+    "fixed_fee": 0.10
+  },
   "email": "example@gmail.com",
   "white_label": False,
   "webhook": "https://webhook.sellix.io/api/v1/example",
