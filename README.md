@@ -103,13 +103,111 @@ sequenceDiagram
 ```
 
 ## Navigation
-the wallet iframe will emit a `GO_TO` postMessage to the platform frontend so that the platform can keep track of the wallet current navigation state, this way the platform frontend can change its UI accordingly to the current wallet page
+The wallet iframe will emit a `GO_TO` postMessage to the platform frontend so that the platform can keep track of the wallet current navigation state, this way the platform frontend can change its UI accordingly to the current wallet page
 
 ## Dark mode
-the wallet iframe can be rendered adding a `dark = true` query parameter to the wallet url, this way the wallet will be rendered in dark mode
+The wallet iframe can be rendered adding a `dark = true` query parameter to the wallet url, this way the wallet will be rendered in dark mode
 
 ## Payments
-WIP
+Payments work with the standard [Sellix Payments API](https://developers.sellix.io) integration, the platform only has to pass the additional field `platform_on_behalf_of`, which equals to the ID of the platform-merchant created through the create merchant endpoint.
+
+It will return a checkout URL where you can redirect the customer to send the payment.
+
+Sample code snippets
+
+PHP
+```php
+<?php
+
+$curl = curl_init();
+
+$data = [
+  "platform_on_behalf_of" => "plat_149ffc-d0acb95171-sample",
+	"title" => "Platform Payment",
+	"value" => 2.50,
+	"currency" => "USD",
+	"email" => "example@gmail.com",
+  "white_label" => false,
+	"webhook" => "https://webhook.sellix.io/api/v1/example",
+	"return_url" => "https://sample.sellix.io/success"
+]
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://dev.sellix.io/v1/payments',
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'POST',
+  CURLOPT_POSTFIELDS => json_encode($data),
+  CURLOPT_HTTPHEADER => array(
+    'Content-Type: application/json',
+    'Authorization: Bearer YOUR_API_KEY'
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+print_r($response);
+```
+
+NodeJS
+```js
+const request = require('request');
+const options = {
+  'method': 'POST',
+  'url': 'https://dev.sellix.io/v1/payments',
+  'headers': {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    "platform_on_behalf_of": "plat_149ffc-d0acb95171-sample",
+    "title": "Platform Payment",
+    "value": 2.5,
+    "currency": "USD",
+    "email": "example@gmail.com",
+    "white_label": false,
+    "webhook": "https://webhook.sellix.io/api/v1/example",
+    "return_url": "https://sample.sellix.io/success"
+  })
+};
+
+request(options, function (error, response) {
+  if (error) throw new Error(error);
+  console.log(response.body);
+});
+```
+
+Python
+```python
+import requests
+import json
+
+url = "https://dev.sellix.io/v1/payments"
+
+payload = json.dumps({
+  "platform_on_behalf_of": "plat_149ffc-d0acb95171-sample",
+  "title": "Platform Payment",
+  "value": 2.5,
+  "currency": "USD",
+  "email": "example@gmail.com",
+  "white_label": False,
+  "webhook": "https://webhook.sellix.io/api/v1/example",
+  "return_url": "https://sample.sellix.io/success"
+})
+headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer YOUR_API_KEY'
+}
+
+response = requests.request("POST", url, headers=headers, data=payload)
+
+print(response.text)
+```
 
 ## Concordium setup flow
 Concordium needs a different setup flow because it requires the merchant to perform a KYC process.
