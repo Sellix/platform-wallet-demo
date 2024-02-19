@@ -19,37 +19,45 @@ const axiosInstance = axios.create({
 const users = []
 
 app.post("/createMerchant", async(req, res) => {
-  const sellixRes = await axiosInstance.post("/wallet/merchant", {
-    email: req.body.email,
-    name: req.body.name,
-    custom_fields: req.body.custom_fields ?? null
-  })
-  if (sellixRes.data.status !== 200) {
-    res.statusCode = sellixRes.data.status
-    res.json(sellixRes.data)
-  } else {
-    users.push(sellixRes.data.data.merchant)
-    res.statusCode = 200
-    res.json(sellixRes.data.data.merchant)
+  try {
+    const sellixRes = await axiosInstance.post("/wallet/merchant", {
+      email: req.body.email,
+      name: req.body.name,
+      custom_fields: req.body.custom_fields ?? null
+    })
+    if (sellixRes.data.status !== 200) {
+      res.statusCode = sellixRes.data.status
+      res.json(sellixRes.data)
+    } else {
+      users.push(sellixRes.data.data.merchant)
+      res.statusCode = 200
+      res.json(sellixRes.data.data.merchant)
+    }
+  } catch (error) {
+    res.status(400).json(error)
   }
 })
 
 app.post("/getMerchantDashboard", async(req, res) => {
-  const { email } = req.body
-  const user = users.find(u => u.email === email)
-  if (!user) {
-    res.statusCode = 404
-    res.json({
-      error: "NOT_FOUND"
-    })
-  }
-  const sellixRes = await axiosInstance.get(`/wallet/merchant/${user.id}`)
-  if (sellixRes.data.status !== 200) {
-    res.statusCode = sellixRes.data.status
-    res.json(sellixRes.data)
-  } else {
-    res.statusCode = 200
-    res.json(sellixRes.data.data.merchant)
+  try {
+    const { email } = req.body
+    const user = users.find(u => u.email === email)
+    if (!user) {
+      res.statusCode = 404
+      res.json({
+        error: "NOT_FOUND"
+      })
+    }
+    const sellixRes = await axiosInstance.get(`/wallet/merchant/${user.id}`)
+    if (sellixRes.data.status !== 200) {
+      res.statusCode = sellixRes.data.status
+      res.json(sellixRes.data)
+    } else {
+      res.statusCode = 200
+      res.json(sellixRes.data.data.merchant)
+    }
+  } catch (error) {
+    res.status(400).json(error)
   }
 })
 
