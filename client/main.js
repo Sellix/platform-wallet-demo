@@ -11,7 +11,7 @@ const getWalletUrl = (target = "local") => {
   } else if (target === "staging") {
     return "https://wallet.sellix-staging.io"
   } else if (target === "production") {
-    return "https://wallet.sellix.io"
+    return "https://wallet-platforms.sellix.io"
   }
 }
 
